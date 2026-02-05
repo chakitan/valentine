@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Will You Be My Valentine?</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #ff9a9e, #fecfef);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Question */
+h1 {
+    font-size: 2.5rem;
+    color: #d63384;
+    margin-bottom: 2rem;
+    text-shadow: 2px 2px 6px rgba(0,0,0,.3);
+    z-index: 10;
+}
+
+/* Buttons */
+.buttons {
+    display: flex;
+    gap: 1rem;
+    z-index: 10;
+}
+
+button {
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(0,0,0,.2);
+    transition: transform .2s ease;
+}
+
+#yes {
+    background: #ff5c9d;
+    color: white;
+}
+
+#yes:hover {
+    transform: scale(1.1);
+}
+
+#no {
+    background: white;
+    color: #d63384;
+    position: fixed;
+}
+
+/* Celebration Overlay */
+#celebration {
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 192, 203, 0.35);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 50;
+}
+
+#celebration h2 {
+    font-size: 4rem;
+    color: #ff1493;
+    margin-bottom: 1.5rem;
+    text-shadow: 3px 3px 10px rgba(0,0,0,.3);
+}
+
+/* GIF Grid */
+.gif-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+    width: 80vw;
+    max-width: 900px;
+}
+
+.gif-grid img {
+    width: 100%;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,.25);
+    opacity: 0;
+}
+
+/* Fade animation */
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: scale(0.9); }
+    20% { opacity: 1; transform: scale(1); }
+    80% { opacity: 1; }
+    100% { opacity: 0; transform: scale(0.9); }
+}
+</style>
+</head>
+
+<body>
+
+<h1 id="question">Will you be my Valentine? 💖</h1>
+
+<div class="buttons">
+    <button id="yes">Yes 💕</button>
+    <button id="no">No</button>
+</div>
+
+<!-- Celebration -->
+<div id="celebration">
+    <h2>Happy Valentine’s Day! ❤️</h2>
+    <div class="gif-grid">
+        <img src="bubu-dance.gif">
+        <img src="dudu-dance.gif">
+        <img src="bubu-band.gif">
+        <img src="dudu-band.gif">
+        <img src="bubu-roll.gif">
+        <img src="dudu-roll.gif">
+    </div>
+</div>
+
+<audio id="loveSong" src="dudi-dudi-dum-dum.mp3"></audio>
+
+<script>
+const noBtn = document.getElementById("no");
+const yesBtn = document.getElementById("yes");
+const celebration = document.getElementById("celebration");
+const song = document.getElementById("loveSong");
+const gifs = document.querySelectorAll(".gif-grid img");
+
+const sensitivity = 90;
+let gifInterval;
+
+// Initial NO position
+noBtn.style.left = "55%";
+noBtn.style.top = "55%";
+
+/* Move NO button */
+function moveNoButton(x, y) {
+    const rect = noBtn.getBoundingClientRect();
+    const dx = x - (rect.left + rect.width / 2);
+    const dy = y - (rect.top + rect.height / 2);
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist < sensitivity) {
+        const angle = Math.atan2(dy, dx) + Math.PI;
+        const newX = rect.left + Math.cos(angle) * 130;
+        const newY = rect.top + Math.sin(angle) * 130;
+
+        noBtn.style.left = Math.min(
+            window.innerWidth - rect.width - 20,
+            Math.max(20, newX)
+        ) + "px";
+
+        noBtn.style.top = Math.min(
+            window.innerHeight - rect.height - 20,
+            Math.max(20, newY)
+        ) + "px";
+    }
+}
+
+/* Mouse + touch */
+document.addEventListener("mousemove", e => moveNoButton(e.clientX, e.clientY));
+document.addEventListener("touchstart", e => {
+    const t = e.touches[0];
+    moveNoButton(t.clientX, t.clientY);
+});
+
+/* GIF control */
+function startGifs() {
+    gifs.forEach((gif, i) => {
+        gif.style.animation = `fadeInOut 3s ease-in-out ${i * 0.4}s infinite`;
+    });
+
+    gifInterval = setInterval(() => {
+        gifs.forEach(gif => {
+            gif.style.animation = "none";
+            gif.offsetHeight; // reflow
+            gif.style.animation = "fadeInOut 3s ease-in-out";
+        });
+    }, 3000);
+}
+
+function stopGifs() {
+    clearInterval(gifInterval);
+    gifs.forEach(gif => gif.style.opacity = 0);
+}
+
+/* YES click */
+yesBtn.addEventListener("click", () => {
+    // Remove UI
+    document.getElementById("question").remove();
+    document.querySelector(".buttons").remove();
+
+    // Show celebration
+    celebration.style.display = "flex";
+
+    // Music plays twice
+    let playCount = 0;
+    song.currentTime = 0;
+    song.play();
+
+    song.onended = () => {
+        playCount++;
+        if (playCount < 2) {
+            song.currentTime = 0;
+            song.play();
+        } else {
+            stopGifs();
+        }
+    };
+
+    startGifs();
+});
+</script>
+
+</body>
+</html>
