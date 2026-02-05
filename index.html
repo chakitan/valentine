@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="icon" href="fav.ico" type="image/x-icon">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Will You Be My Valentine?</title>
@@ -29,6 +30,7 @@ h1 {
     margin-bottom: 2rem;
     text-shadow: 2px 2px 6px rgba(0,0,0,.3);
     z-index: 10;
+    text-align: center;
 }
 
 /* Buttons */
@@ -80,6 +82,7 @@ button {
     color: #ff1493;
     margin-bottom: 1.5rem;
     text-shadow: 3px 3px 10px rgba(0,0,0,.3);
+    text-align: center;
 }
 
 /* GIF Grid */
@@ -91,44 +94,49 @@ button {
     max-width: 900px;
 }
 
-.gif-grid img {
+/* .gif-grid img {
     width: 100%;
     border-radius: 20px;
     box-shadow: 0 10px 25px rgba(0,0,0,.25);
     opacity: 0;
-}
+} */
 
 /* Fade animation */
 @keyframes fadeInOut {
     0% { opacity: 0; transform: scale(0.9); }
-    20% { opacity: 1; transform: scale(1); }
-    80% { opacity: 1; }
+    15% { opacity: 1; transform: scale(1); }
+    85% { opacity: 1; }
     100% { opacity: 0; transform: scale(0.9); }
 }
+
+.gif-grid img {
+    width: 100%;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,.25);
+    animation: fadeInOut 10s ease-in-out;
+}
+
 </style>
 </head>
 
 <body>
-
+<img src="dudu-waiting.gif" id="duduwaiting" alt="dudu-waiting">
 <h1 id="question">Will you be my Valentine? 💖</h1>
 
 <div class="buttons">
     <button id="yes">Yes 💕</button>
-    <button id="no">No</button>
+    <button id="no">No 💔</button>
 </div>
 
 <!-- Celebration -->
 <div id="celebration">
     <h2>Happy Valentine’s Day! ❤️</h2>
-    <div class="gif-grid">
-        <img src="bubu-dance.gif">
-        <img src="dudu-dance.gif">
-        <img src="bubu-band.gif">
-        <img src="dudu-band.gif">
-        <img src="bubu-roll.gif">
-        <img src="dudu-roll.gif">
+    <div class="gif-grid" id="gifGrid">
+        
     </div>
 </div>
+
+<!-- <p id="mylove">#ChakitanKiReva</p> -->
 
 <audio id="loveSong" src="dudi-dudi-dum-dum.mp3"></audio>
 
@@ -137,14 +145,14 @@ const noBtn = document.getElementById("no");
 const yesBtn = document.getElementById("yes");
 const celebration = document.getElementById("celebration");
 const song = document.getElementById("loveSong");
-const gifs = document.querySelectorAll(".gif-grid img");
+// const gifs = document.querySelectorAll(".gif-grid img");
 
 const sensitivity = 90;
 let gifInterval;
 
 // Initial NO position
-noBtn.style.left = "55%";
-noBtn.style.top = "55%";
+noBtn.style.left = "65%";
+//noBtn.style.top = "55%";
 
 /* Move NO button */
 function moveNoButton(x, y) {
@@ -178,28 +186,65 @@ document.addEventListener("touchstart", e => {
 });
 
 /* GIF control */
-function startGifs() {
-    gifs.forEach((gif, i) => {
-        gif.style.animation = `fadeInOut 3s ease-in-out ${i * 0.4}s infinite`;
-    });
+const gifGrid = document.getElementById("gifGrid");
 
-    gifInterval = setInterval(() => {
-        gifs.forEach(gif => {
-            gif.style.animation = "none";
-            gif.offsetHeight; // reflow
-            gif.style.animation = "fadeInOut 3s ease-in-out";
-        });
-    }, 3000);
+const gifList = [
+    "bubu-dance.gif",
+    "dudu-dance.gif",
+    "bubu-band.gif",
+    "dudu-band.gif",
+    "bubu-roll.gif",
+    "dudu-roll.gif"
+];
+
+let gifIndex = 0;
+let gifTimer;
+
+function showNextGifPair() {
+    gifGrid.innerHTML = "";
+
+    for (let i = 0; i < 2; i++) {
+        const img = document.createElement("img");
+        img.src = gifList[(gifIndex + i) % gifList.length];
+        gifGrid.appendChild(img);
+    }
+
+    gifIndex = (gifIndex + 2) % gifList.length;
 }
 
-function stopGifs() {
-    clearInterval(gifInterval);
-    gifs.forEach(gif => gif.style.opacity = 0);
+function startGifCycle() {
+    showNextGifPair();
+    gifTimer = setInterval(showNextGifPair, 5000);
 }
+
+function stopGifCycle() {
+    clearInterval(gifTimer);
+    gifGrid.innerHTML = "";
+}
+
+// function startGifs() {
+//     gifs.forEach((gif, i) => {
+//         gif.style.animation = `fadeInOut 3s ease-in-out ${i * 0.4}s infinite`;
+//     });
+
+//     gifInterval = setInterval(() => {
+//         gifs.forEach(gif => {
+//             gif.style.animation = "none";
+//             gif.offsetHeight; // reflow
+//             gif.style.animation = "fadeInOut 3s ease-in-out";
+//         });
+//     }, 3000);
+// }
+
+// function stopGifs() {
+//     clearInterval(gifInterval);
+//     gifs.forEach(gif => gif.style.opacity = 0);
+// }
 
 /* YES click */
 yesBtn.addEventListener("click", () => {
     // Remove UI
+    document.getElementById("duduwaiting").remove();
     document.getElementById("question").remove();
     document.querySelector(".buttons").remove();
 
@@ -213,15 +258,16 @@ yesBtn.addEventListener("click", () => {
 
     song.onended = () => {
         playCount++;
-        if (playCount < 2) {
+        if (playCount < 1) {
             song.currentTime = 0;
             song.play();
         } else {
-            stopGifs();
+            // stopGifs();
+            stopGifCycle();
         }
     };
-
-    startGifs();
+    startGifCycle();
+    // startGifs();
 });
 </script>
 
